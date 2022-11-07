@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Block {
+  id     String  @id @default(cuid())
+  type   String
+  html   String?
+  pageId String
+
+  page Page @relation(fields: [pageId], references: [id])
+}
+
+model Page {
+  id   String @id @default(cuid())
+  name String
+
+  blocks Block[]
+}
