@@ -9,24 +9,21 @@ interface NoticeProps{
 }
 
 const Notice = (props : NoticeProps) => {
-  const [isVisible, setIsVisible] = useState(true);
-
-  return  isVisible ? showNotice(props, setIsVisible) : null;
+    const [isVisible, setIsVisible] = useState(true);
+    return  isVisible ? getNotice(props, setIsVisible) : null;
 };
 
 export default Notice;
 
-function showNotice(props : NoticeProps, setIsVisible: Dispatch<SetStateAction<boolean>>){
+function getNotice(props : NoticeProps, setIsVisible: Dispatch<SetStateAction<boolean>>){
     return (
         <div className="" >
             {props.dismissible && (
-            <span
-                role="button"
-                className=""
-                onClick={() => setIsVisible(false)}
-            >
-                <Image src={CloseIcon} alt="close icon" />
-            </span>)}
+                <span role="button" className="" onClick={() => setIsVisible(false)}>
+                    <Image src={CloseIcon} alt="close icon" />
+                </span>
+                )
+            }
             {props.children}
         </div>
     );
