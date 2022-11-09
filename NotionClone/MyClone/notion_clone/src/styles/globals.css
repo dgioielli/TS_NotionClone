@@ -5,3 +5,8 @@
 body {
   -webkit-font-smoothing: antialiased;
 }
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1.25rem;
+}

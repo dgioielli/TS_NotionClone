@@ -5,7 +5,7 @@ import CloseIcon from "../../images/close.svg";
 
 const Notice = ({ children, status, mini, dismissible, style }) => {
   const [isVisible, setIsVisible] = useState(true);
-
+ 
   return (
     <div
       style={{ ...style }}

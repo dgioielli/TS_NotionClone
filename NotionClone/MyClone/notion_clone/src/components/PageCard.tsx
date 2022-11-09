@@ -1,10 +1,13 @@
 import { useState } from "react";
+import Image from "next/image";
 //import { useRouter } from "next/router";
 
 import DOMPurify from "isomorphic-dompurify";
 
 //import ContextMenu from "../contextMenu";
 import MoreIcon from "../assets/more.svg";
+import { BlockData } from "../models/BlockData";
+import { PageData } from "../models/PageData";
 
 const MONTHS = [
   "Jan",
@@ -22,31 +25,17 @@ const MONTHS = [
 ];
 
 interface BaseCardProps{
-    pageId : string;
-    pageName : string;
-    date? : Date;
-    content : BlockData[];
+    page : PageData;
     deleteCard? : any;
 }
 
-interface BlockData{
-    tag : string;
-    html : string;
-}
-
 const Card = (props : BaseCardProps) => {
-    console.log(props.pageName);
+    console.log(props.page.name);
     //const router = useRouter();
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
     // In the card preview, we only want to show textual content
-    const textContent = props.content.filter((block:BlockData) => block.tag !== "img");
-    // console.log(props);
-    // return null;
-    //const formattedDate = `${MONTHS[props.date.getMonth()]}/ ${props.date.getDate()}/ ${props.date.getFullYear()}`;
-
-  // https://github.com/vercel/next.js/issues/2833#issuecomment-489292656
-  //const forwardToPage = (id) => { router.push("/p/[pid]", `/p/${id}`); };
+    const textContent = props.page.blocks.filter((block:BlockData) => block.type !== "img");
 
     const deletePage = (id:string) => {
         setIsContextMenuOpen(false);
@@ -54,6 +43,7 @@ const Card = (props : BaseCardProps) => {
     };
 
     const toggleContextMenu = () => {
+        console.log("Apertou os três pontos...");
         setIsContextMenuOpen(!isContextMenuOpen);
     };
 
@@ -62,31 +52,25 @@ const Card = (props : BaseCardProps) => {
     };
 
     return (
-        <div className=""> { /* {styles.cardWrapper} */}
-            <a href={`/p/${props.pageId}`}>
-                <h1>{props.pageName}</h1>
-                <article className="">
-                 { /* {styles.card} */}
-                    {/* <div className="">{formattedDate}</div> {styles.date} */}
-                    <div className=""> {/* {styles.content}*/}
-                        {textContent.map((block:BlockData, key) => {
-                            const HTMLTag = block.tag;
-                            const html = `${props.pageId} ${DOMPurify.sanitize(block.html)}`;
+        <div className="relative w-5/6 h-auto m-2 mx-auto">
+            <a href={`/p/${props.page.id}`}>
+                <article className="bg-gray-100 border border-gray-400 rounded-lg p-4 text-base font-regular text-appBase-800">
+                    <h1>{props.page.name}</h1>
+                    <div className="relative overflow-hidden h-auto ">
+                        {/* {textContent.map((block:BlockData, key) => {
+                            const HTMLTag = block.type;
+                            const html = `${props.page.id} ${DOMPurify.sanitize(block.html)}`;
                             return (
                                 <p key={key} dangerouslySetInnerHTML={{ __html: html }} />
                             );
-                        })}
+                        })} */}
                     </div>
                 </article>
             </a>
-            <span
-                role="button"
-                className="" 
-                onClick={() => toggleContextMenu()}
-                > {/*{styles.moreButton}*/}
-                <img src={MoreIcon} alt="Icon" />
+            <span role="button" className="absolute bottom-0 right-0 z-10 w-20 h-12 flex justify-center items-center" onClick={() => toggleContextMenu()} > 
+                <Image width={20} height={20} src={MoreIcon} alt="Icon" />
             </span>
-            {isContextMenuOpen && ( null
+            {/* {isContextMenuOpen && ( null
         // <ContextMenu
         //   menuItems={[
         //     { id: "edit", label: "Edit", action: () => forwardToPage(pageId) },
@@ -94,7 +78,7 @@ const Card = (props : BaseCardProps) => {
         //   ]}
         //   closeAction={() => closeContextMenu()}
         // />
-        )}
+        )} */}
     </div>
     );
 };

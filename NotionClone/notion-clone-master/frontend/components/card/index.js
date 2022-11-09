@@ -50,7 +50,7 @@ const Card = ({ pageId, date, content, deleteCard }) => {
   const closeContextMenu = () => {
     setIsContextMenuOpen(false);
   };
-
+ 
   return (
     <div className={styles.cardWrapper}>
       <a href={`/p/${pageId}`}>
