@@ -30,12 +30,12 @@ interface BaseCardProps{
 }
 
 const Card = (props : BaseCardProps) => {
-    console.log(props.page.name);
+    //console.log(props.page.name);
     //const router = useRouter();
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
     // In the card preview, we only want to show textual content
-    const textContent = props.page.blocks.filter((block:BlockData) => block.type !== "img");
+    //const textContent = props.page.blocks.filter((block:BlockData) => block.type !== "img");
 
     const deletePage = (id:string) => {
         setIsContextMenuOpen(false);

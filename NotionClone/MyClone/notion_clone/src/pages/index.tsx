@@ -5,18 +5,35 @@ import Notice from '../components/NoticeCard';
 import Card from '../components/PageCard';
 import { BlockData } from '../models/BlockData';
 import { PageData } from '../models/PageData';
+import { api, apiClient } from "../lib/axios";
+import { useRouter } from 'next/router';
 
 const mockPage = { id: "10", name: "Teste", blocks : [] }
-var initialCards : PageData[] = [ ];
+// var initialCards : PageData[] = [ ];
 //const initialCards : PageData[] = [ mockPage, mockPage ];
 
-export default function Home() {
+interface HomeProps{
+  listCards : PageData[];
+}
+
+export default function Home(props:HomeProps) {
+  //console.log(props);
+  const router = useRouter();
+  const initialCards : PageData[] = props.listCards;
   const [cards, setCards] = useState(initialCards.map((data : PageData) => data));
 
-  const addNewPage = () => {
-    initialCards.push(mockPage);
-    console.log(initialCards.length);
-    setCards(initialCards);
+  const addNewPage = async () => {
+    try{
+      const reply = await apiClient.post("pages", {
+        name : "New Page"
+      });
+      console.log(reply);
+    } catch (err) {
+      console.log(err);
+      alert("O bolão foi criado com sucesso! O código foi copiado para a área de transferência.");
+    }
+    window.location.reload();
+    //router.push("");
   }
 
   return (
@@ -26,8 +43,7 @@ export default function Home() {
         {cards.length === 0 ? emptyNotice() : null}
         {cards.map((page : PageData) => {
           const pageId = page.id;
-          const blocks = page.blocks;
-          return ( <Card key={"key"} page={page} />  );
+          return ( <Card key={page.id} page={page} />  );
         })}
       </div>
       <div className='text-center'>
@@ -36,8 +52,17 @@ export default function Home() {
     </div>
   )
 }
-// w-98% p-4 mx-4 h-10 bg-appBase-500 rounded-lg content-center
-//{/* date={updatedAtDate}*/ } {/*deleteCard={(pageId) => deleteCard(pageId)}*/ }
+
+export const getServerSideProps = async () => {
+  const pages = await api.get("pages");
+  const pagesList = pages.data.pages;
+  const listCards : PageData[] = [];
+  for(let i = 0; i < pagesList.length; i++){
+    const pg : PageData = pagesList[i];
+    listCards.push({ "id" : pg.id, "name" : pg.name });
+  } 
+  return { props : { listCards } };
+}
 
 function emptyNotice(){
   const title = "Let's go!";
