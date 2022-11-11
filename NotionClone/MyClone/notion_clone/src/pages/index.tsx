@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { useState } from 'react';
+import { Component, ReactNode, useState } from 'react';
 import Notice from '../components/NoticeCard';
 import Card from '../components/PageCard';
 import { BlockData } from '../models/BlockData';
@@ -16,13 +16,20 @@ interface HomeProps{
   listCards : PageData[];
 }
 
-export default function Home(props:HomeProps) {
-  //console.log(props);
-  const router = useRouter();
-  const initialCards : PageData[] = props.listCards;
-  const [cards, setCards] = useState(initialCards.map((data : PageData) => data));
+interface HomeState{
+  cards : PageData[];
+}
 
-  const addNewPage = async () => {
+class Home extends Component<HomeProps, HomeState>{
+  properties : HomeProps;
+
+  constructor(props : HomeProps){
+    super(props);
+    this.properties = props;
+    this.state = { cards : props.listCards };
+  }
+
+  async addNewPage(){
     try{
       const reply = await apiClient.post("pages", {
         name : "New Page"
@@ -30,28 +37,60 @@ export default function Home(props:HomeProps) {
       console.log(reply);
     } catch (err) {
       console.log(err);
-      alert("O bolão foi criado com sucesso! O código foi copiado para a área de transferência.");
+      alert("Não foi possível criar uma nova página.");
     }
     window.location.reload();
-    //router.push("");
   }
 
-  return (
-    <div className='text-appBase-100 mb-12'>
-      <h1 className="text-center">Pages</h1>
-      <div id="pageList">
-        {cards.length === 0 ? emptyNotice() : null}
-        {cards.map((page : PageData) => {
-          const pageId = page.id;
-          return ( <Card key={page.id} page={page} />  );
-        })}
+  async deletePage(pageId : string) {
+    console.log("Deletar item " + pageId);
+    try{
+      const reply = await apiClient.delete("pages", {
+        data : {
+          id : pageId
+        }
+      });
+      console.log(reply);
+    } catch (err) {
+      console.log(err);
+      alert("Não foi possível deletar a página.");
+    }
+    window.location.reload();
+  }
+
+  emptyNotice() : ReactNode{
+    const title = "Let's go!";
+    const row1 = "Seems like you haven't created any pages so far.";
+    return (
+      <Notice dismissible={true} >
+        <h3>{title}</h3>
+        <p>{row1}</p>
+        <p>How about starting now?</p>
+      </Notice>
+    );
+  }
+
+  render() : ReactNode{
+    return (
+      <div className='text-appBase-100 mb-12'>
+        <h1 className="text-center">Pages</h1>
+        <div id="pageList">
+          {this.state.cards.length === 0 ? this.emptyNotice() : null}
+          {this.state.cards.map((page : PageData) => {
+            const pageId = page.id;
+            return ( <Card key={page.id} page={page} deleteCard={this.deletePage} />  );
+          })}
+        </div>
+        <div className='text-center'>
+          <button className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-24 rounded' 
+                  onClick={() => { this.addNewPage() }} >Create A New Page</button>
+        </div>
       </div>
-      <div className='text-center'>
-        <button className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-24 rounded' onClick={() => { addNewPage() }} >Create A New Page</button>
-      </div>
-    </div>
-  )
+    );
+  }
 }
+
+export default Home;
 
 export const getServerSideProps = async () => {
   const pages = await api.get("pages");
@@ -62,16 +101,4 @@ export const getServerSideProps = async () => {
     listCards.push({ "id" : pg.id, "name" : pg.name });
   } 
   return { props : { listCards } };
-}
-
-function emptyNotice(){
-  const title = "Let's go!";
-  const row1 = "Seems like you haven't created any pages so far.";
-  return (
-    <Notice dismissible={true} >
-      <h3>{title}</h3>
-      <p>{row1}</p>
-      <p>How about starting now?</p>
-    </Notice>
-  );
 }

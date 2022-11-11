@@ -4,19 +4,17 @@ import { useRouter } from "next/router";
 import Notice from "./NoticeCard";
 import { BlockData } from "../models/BlockData";
 import EditableBlock from "./EditableBlock";
-
-const mockData = [
-    { id : "5f54d75b114c6d176d7e9765", html : "Heading", type : "", pageId : "10" },
-    { id : "5f54d75b114c6d176d7e9766", html : "I am a <strong>paragraph</strong>", type : "", pageId : "10" },
-    { id : "5f54d75b114c6d176d7e9767", html : "I am a <strong>paragraph</strong>", type : "", pageId : "10" },
-]
+import { PageData } from "../models/PageData";
+import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
+import { apiClient } from "../lib/axios";
 
 interface DataProps{
-    id : string;
-    //blockList : BlockData[];
+    page : PageData;
+    blockList : BlockData[];
 }
 
 interface DataState{
+  namePage : string;
   blocks : BlockData[];
 }
 
@@ -27,18 +25,35 @@ class EditablePage extends Component<DataProps, DataState>{
   constructor(props : DataProps){
     super(props);
     this.properties = props;
-    this.state = { blocks : mockData };
+    this.state = { blocks : props.blockList, namePage : props.page.name };
   }
 
   getEditableBlock(block:BlockData) {
     return (<EditableBlock block={block} />);
   }
 
+  handleChange = (evt : ContentEditableEvent) => {
+    this.setState({ namePage : evt.target.value });
+  };
+
+  handleBlur = async () => {
+    console.log(this.properties.page.id);
+    console.log(`page/${this.properties.page.id}`);
+    try{
+      const reply = await apiClient.put(`page/${this.properties.page.id}`, {
+        name : this.state.namePage
+      });
+      console.log(reply);
+    } catch (err) {
+      console.log(err);
+      alert("Não foi possível editar a página.");
+    }
+  }
+
   render(): ReactNode {
     return (
       <div>
-        <h1>{this.properties.id}</h1>
-        <p>Página editável!!!</p>
+        <ContentEditable html={this.state.namePage} onChange={this.handleChange} onBlur={this.handleBlur} tagName={"h1"} />
         {this.state.blocks.map((block : BlockData) => this.getEditableBlock(block))}
       </div>
     );
@@ -46,22 +61,4 @@ class EditablePage extends Component<DataProps, DataState>{
 
 }
 
-// const EditablePage = (props: DataProps) => {
-//   const router = useRouter();
-//   const [blocks, setBlocks] = useState(mockData);
-
-//   const isNewPublicPage = router.query.public === "true";
-//   return (
-//     <div>
-//       <h1>{props.id}</h1>
-//       <p>Página editável!!!</p>
-//       {blocks.map((block : BlockData) => getEditableBlock(block))}
-//     </div>
-//   );
-// };
-
 export default EditablePage;
-
-// function getEditableBlock(block : BlockData){
-//   return (<EditableBlock block={block} />);
-// }

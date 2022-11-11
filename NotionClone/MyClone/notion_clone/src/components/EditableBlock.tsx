@@ -28,8 +28,8 @@ class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
 
     render(): ReactNode {
         return (
-            <div>
-                <h1>Bloco editável!!!</h1>
+            <div className="hover:bg-gray-200 p-2">
+                {/* <h1>Bloco editável!!!</h1> */}
                 <ContentEditable html={this.state.html} onChange={this.handleChange} />
             </div>
         );
