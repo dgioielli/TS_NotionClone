@@ -12,18 +12,18 @@ import { PageData } from "../models/PageData";
 import ContentEditable from "react-contenteditable";
 
 const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
 ];
 
 interface BaseCardProps{
@@ -38,6 +38,7 @@ const Card = (props : BaseCardProps) => {
 
     // In the card preview, we only want to show textual content
     //const textContent = props.page.blocks.filter((block:BlockData) => block.type !== "img");
+    
 
     const toggleContextMenu = () => {
         console.log("Apertou os três pontos...");

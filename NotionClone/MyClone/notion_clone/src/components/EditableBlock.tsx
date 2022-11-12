@@ -1,10 +1,13 @@
 import { BlockData } from "../models/BlockData";
-import ContentEditable from "react-contenteditable";
-import { Component, ReactNode } from "react";
+import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
+import { Component, FocusEventHandler, ReactNode } from "react";
+import getSelection from "../utils/getSelection";
+import React from "react";
 
 
 interface EditableBlockProps{
     block : BlockData;
+    onChange : (currentBlock : BlockData) => void;
 }
 
 interface EditableBlockState{
@@ -14,23 +17,45 @@ interface EditableBlockState{
 class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
 
     properties : EditableBlockProps;
+    //contentEditable : any;
+    
 
     constructor(props : EditableBlockProps){
         super(props);
         this.properties = props;
+        //this.contentEditable = React.createRef();
         this.state = { html: props.block.html };
     }
 
-    handleChange(evt : any){
+    handleChange = (evt : ContentEditableEvent) => {
         //console.log(evt.target.value);
-        this.setState({ html: evt.target.value });
+        this.setState({ html: evt.target.value }, this.updateBlock);
     };
+
+    handleBlur = () => {
+    }
+
+    updateBlock = () => {
+        this.properties.onChange({
+            id : this.properties.block.id,
+            html : this.state.html,
+            pageId : this.properties.block.pageId,
+            type : this.properties.block.type,
+        });
+    }
+
+    onFocus = () => {
+        // console.log(this.contentEditable);
+        // console.log(typeof this.contentEditable);
+        // console.log(this.contentEditable.current);
+        // console.log(typeof this.contentEditable.current);
+        //console.log(getSelection(this.contentEditable.current));
+    }
 
     render(): ReactNode {
         return (
             <div className="hover:bg-gray-200 p-2">
-                {/* <h1>Bloco editável!!!</h1> */}
-                <ContentEditable html={this.state.html} onChange={this.handleChange} />
+                <ContentEditable className="p-2" html={this.state.html} onChange={this.handleChange} onBlur={this.handleBlur} onFocus={this.onFocus} />
             </div>
         );
     }
