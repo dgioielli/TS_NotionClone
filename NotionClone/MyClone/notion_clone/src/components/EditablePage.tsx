@@ -16,7 +16,7 @@ interface DataProps{
 interface DataState{
   namePage : string;
   blocks : BlockData[];
-  teste : string;
+  deletedBlocks : BlockData[];
 }
 
 class EditablePage extends Component<DataProps, DataState>{
@@ -26,7 +26,12 @@ class EditablePage extends Component<DataProps, DataState>{
   constructor(props : DataProps){
     super(props);
     this.properties = props;
-    this.state = { blocks : this.addLastBlockEmpty(props.blockList), namePage : props.page.name, teste: "teste" };
+    const delBlocks : BlockData[] = [];
+    this.state = { 
+      blocks : this.addLastBlockEmpty(props.blockList), 
+      namePage : props.page.name, 
+      deletedBlocks : delBlocks,
+    };
   }
 
   checkLastBlockEmpty = (list : BlockData[]) : boolean => {
@@ -63,8 +68,20 @@ class EditablePage extends Component<DataProps, DataState>{
     this.setState({ blocks : updatedBlocks}, this.blockListUpdateCallBack);
   }
 
+  deleteBlock = (currentBlock : BlockData) => {
+    if (this.state.blocks.length > 1) {
+      const index = this.state.blocks.map((b) => b.id).indexOf(currentBlock.id);
+      const deletedBlock = this.state.blocks[index];
+      const updatedBlocks = [...this.state.blocks];
+      updatedBlocks.splice(index, 1);
+      this.setState({ blocks : updatedBlocks}, this.blockListUpdateCallBack);
+      const deletedBlocks = [... this.state.deletedBlocks, deletedBlock];
+      this.setState({ deletedBlocks : deletedBlocks}, this.blockListUpdateCallBack);
+    }
+  }
+
   getEditableBlock(block:BlockData) {
-    return (<EditableBlock block={block} onChange={this.updateBlock} />);
+    return (<EditableBlock block={block} onChange={this.updateBlock} deleteBlock={this.deleteBlock} />);
   }
 
   handleChangeNamePage = (evt : ContentEditableEvent) => {

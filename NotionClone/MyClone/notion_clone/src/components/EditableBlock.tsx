@@ -8,6 +8,7 @@ import React from "react";
 interface EditableBlockProps{
     block : BlockData;
     onChange : (currentBlock : BlockData) => void;
+    deleteBlock : (currentBlock : BlockData) => void;
 }
 
 interface EditableBlockState{
