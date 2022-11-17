@@ -31,11 +31,13 @@ export default Page;
 
 export const getServerSideProps = async (context:any) => {
     //console.log(context);
-    const mockData : BlockData[] = [
-        { id : "5f54d75b114c6d176d7e9765", html : "Heading", type : "", pageId : "10" },
-        { id : "5f54d75b114c6d176d7e9766", html : "I am a <strong>paragraph</strong>", type : "", pageId : "10" },
-        { id : "5f54d75b114c6d176d7e9767", html : "I am a <strong>paragraph</strong>", type : "", pageId : "10" },
-    ];
+    // const mockData : BlockData[] = [
+    //     { id : "5f54d75b114c6d176d7e9765", html : "Heading", type : "", pageId : "10" },
+    //     { id : "5f54d75b114c6d176d7e9766", html : "I am a <strong>paragraph</strong>", type : "", pageId : "10" },
+    //     { id : "5f54d75b114c6d176d7e9767", html : "I am a <strong>paragraph</strong>", type : "", pageId : "10" },
+    // ];
+    const getBlocks = await api.get(`blocks/${context.query.pageId}`);
+    const getBlocksData : BlockData[] = getBlocks.data.blocks;
     console.log(`page/${context.query.pageId}`);
     const getPage = await api.get(`page/${context.query.pageId}`);
     const getPageData : PageData = getPage.data.page;
@@ -44,7 +46,7 @@ export const getServerSideProps = async (context:any) => {
         props : { 
             //page: mockPage,
             page : getPageData,
-            blockList : mockData,
+            blockList : getBlocksData,
         }
     };
 };

@@ -6,7 +6,8 @@ import EditableBlock from "./EditableBlock";
 import { PageData } from "../models/PageData";
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
 import { apiClient } from "../lib/axios";
-import tempId from "../utils/tempId";
+import tempId, { baseTempId } from "../utils/tempId";
+import { stat } from "fs";
 
 interface DataProps{
     page : PageData;
@@ -59,13 +60,51 @@ class EditablePage extends Component<DataProps, DataState>{
       this.setState({ blocks : this.addLastBlockEmpty(this.state.blocks)});
       console.log("new block");
     }
-  }
+  }  
   
   updateBlock = (currentBlock : BlockData) => {
     const index = this.state.blocks.map((b) => b.id).indexOf(currentBlock.id);
     const updatedBlocks = [...this.state.blocks];
+    //this.saveBlock(currentBlock);
     updatedBlocks[index] = currentBlock;
     this.setState({ blocks : updatedBlocks}, this.blockListUpdateCallBack);
+  }
+
+  saveBlock = (block : BlockData) => {
+    if (block.id.includes(baseTempId)){
+      this.addDataBlock(block);
+    } else {
+      this.updateDataBlock(block);
+    }
+  }
+
+  addDataBlock = async (block : BlockData) => {
+    try{
+      const reply = await apiClient.post(`blocks`, {
+        html : block.html,
+        pageId : block.pageId,
+        type : block.type,
+      });
+      console.log(reply);
+      block.id = reply.data.id;
+    } catch (err) {
+      console.log(err);
+      alert("Não foi possível editar a página.");
+    }
+  }
+
+  updateDataBlock = async (block:BlockData) => {
+    try{
+      const reply = await apiClient.put(`block/${block.id}`, {
+        html : block.html,
+        pageId : block.pageId,
+        type : block.type,
+      });
+      console.log(reply);
+    } catch (err) {
+      console.log(err);
+      alert("Não foi possível editar a página.");
+    }
   }
 
   deleteBlock = (currentBlock : BlockData) => {
@@ -74,14 +113,27 @@ class EditablePage extends Component<DataProps, DataState>{
       const deletedBlock = this.state.blocks[index];
       const updatedBlocks = [...this.state.blocks];
       updatedBlocks.splice(index, 1);
+      this.deleteDataBlock(deletedBlock);
       this.setState({ blocks : updatedBlocks}, this.blockListUpdateCallBack);
-      const deletedBlocks = [... this.state.deletedBlocks, deletedBlock];
-      this.setState({ deletedBlocks : deletedBlocks}, this.blockListUpdateCallBack);
+    }
+  }
+
+  deleteDataBlock =async (block:BlockData) => {
+    try{
+      const reply = await apiClient.delete(`blocks`, {
+        data : {
+          id : block.id,
+        }
+      });
+      console.log(reply);
+    } catch (err) {
+      console.log(err);
+      alert("Não foi possível editar a página.");
     }
   }
 
   getEditableBlock(block:BlockData) {
-    return (<EditableBlock block={block} onChange={this.updateBlock} deleteBlock={this.deleteBlock} />);
+    return (<EditableBlock key={block.id} block={block} onChange={this.updateBlock} deleteBlock={this.deleteBlock} onBlur={this.saveBlock} />);
   }
 
   handleChangeNamePage = (evt : ContentEditableEvent) => {
@@ -106,7 +158,7 @@ class EditablePage extends Component<DataProps, DataState>{
     return (
       <div>
         <div className="hover:bg-gray-200 p-2">
-          <ContentEditable html={this.state.namePage} onChange={this.handleChangeNamePage} onBlur={this.handleBlurNamePage} tagName={"h1"} />
+          <ContentEditable key={0} html={this.state.namePage} onChange={this.handleChangeNamePage} onBlur={this.handleBlurNamePage} tagName={"h1"} />
         </div>
         {this.state.blocks.map((block : BlockData) => this.getEditableBlock(block))}
       </div>

@@ -3,6 +3,8 @@ import cors from "@fastify/cors";
 import { setPagesController } from "./controllers/pagesController";
 import { setPageController } from "./controllers/pageController";
 import { PrismaClient } from "@prisma/client";
+import { setBlocksController } from "./controllers/BlocksControllers";
+import { setBlockController } from "./controllers/BlockController";
 
 const prisma = new PrismaClient({
     log: ["query"],
@@ -15,6 +17,8 @@ export async function bootstrap(){
 
     setPagesController(fstf, prisma);
     setPageController(fstf, prisma);
+    setBlocksController(fstf, prisma);
+    setBlockController(fstf, prisma);
 
     fstf.listen({ 
         port: 3333,

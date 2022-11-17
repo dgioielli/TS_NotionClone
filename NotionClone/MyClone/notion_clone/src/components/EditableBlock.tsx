@@ -8,6 +8,7 @@ import React from "react";
 interface EditableBlockProps{
     block : BlockData;
     onChange : (currentBlock : BlockData) => void;
+    onBlur : (currentBlock : BlockData) => void;
     deleteBlock : (currentBlock : BlockData) => void;
 }
 
@@ -16,6 +17,7 @@ interface EditableBlockState{
 }
 
 class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
+    
 
     properties : EditableBlockProps;
     //contentEditable : any;
@@ -34,6 +36,12 @@ class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
     };
 
     handleBlur = () => {
+        this.properties.onBlur({
+            id : this.properties.block.id,
+            html : this.state.html,
+            pageId : this.properties.block.pageId,
+            type : this.properties.block.type,
+        });
     }
 
     updateBlock = () => {
@@ -53,10 +61,17 @@ class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
         //console.log(getSelection(this.contentEditable.current));
     }
 
+    handleKeyDown = (event : React.KeyboardEvent) => {
+        if (event.key === "Backspace" && !this.state.html){
+            this.properties.deleteBlock(this.properties.block);
+        }
+    }
+
     render(): ReactNode {
         return (
             <div className="hover:bg-gray-200 p-2">
-                <ContentEditable className="p-2" html={this.state.html} onChange={this.handleChange} onBlur={this.handleBlur} onFocus={this.onFocus} />
+                <ContentEditable className="p-2" html={this.state.html} onChange={this.handleChange} onBlur={this.handleBlur} onFocus={this.onFocus}
+                    onKeyDown={this.handleKeyDown} />
             </div>
         );
     }
