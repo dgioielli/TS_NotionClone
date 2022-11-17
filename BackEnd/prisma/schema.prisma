@@ -14,7 +14,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model World {
+model Block {
+  id     String  @id @default(cuid())
+  type   String
+  html   String?
+  pageId String
+
+  page Page @relation(fields: [pageId], references: [id])
+}
+
+model Page {
   id   String @id @default(cuid())
-  Name String @unique
+  name String
+
+  blocks Block[]
 }
