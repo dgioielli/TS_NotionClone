@@ -1,8 +1,8 @@
 import { BlockData } from "../models/BlockData";
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
-import { Component, FocusEventHandler, ReactNode } from "react";
-import getSelection from "../utils/getSelection";
+import { Component, ReactNode } from "react";
 import React from "react";
+import { getCaretIndex } from "../utils/getCaretIndex";
 
 
 interface EditableBlockProps{
@@ -10,10 +10,12 @@ interface EditableBlockProps{
     onChange : (currentBlock : BlockData) => void;
     onBlur : (currentBlock : BlockData) => void;
     deleteBlock : (currentBlock : BlockData) => void;
+    moveFocus : (block : BlockData, isNext : boolean) => void;
 }
 
 interface EditableBlockState{
     html : string;
+    edited : boolean;
 }
 
 class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
@@ -27,21 +29,25 @@ class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
         super(props);
         this.properties = props;
         //this.contentEditable = React.createRef();
-        this.state = { html: props.block.html };
+        this.state = { html: props.block.html, edited : false };
     }
 
     handleChange = (evt : ContentEditableEvent) => {
-        //console.log(evt.target.value);
-        this.setState({ html: evt.target.value }, this.updateBlock);
+        if (this.state.html !== evt.target.value){
+            this.setState({ html: evt.target.value }, this.updateBlock);
+            this.setState({ edited: true });
+        }
     };
 
     handleBlur = () => {
-        this.properties.onBlur({
-            id : this.properties.block.id,
-            html : this.state.html,
-            pageId : this.properties.block.pageId,
-            type : this.properties.block.type,
-        });
+        if (this.state.edited){
+            this.properties.onBlur({
+                id : this.properties.block.id,
+                html : this.state.html,
+                pageId : this.properties.block.pageId,
+                type : this.properties.block.type,
+            });
+        }
     }
 
     updateBlock = () => {
@@ -62,8 +68,14 @@ class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
     }
 
     handleKeyDown = (event : React.KeyboardEvent) => {
+        // console.log(getCaretIndex(event.currentTarget));
+        // console.log(event.key);
         if (event.key === "Backspace" && !this.state.html){
             this.properties.deleteBlock(this.properties.block);
+        } else if (event.key === "ArrowUp"){
+            this.properties.moveFocus(this.properties.block, false);
+        } else if (event.key === "ArrowDown"){
+            this.properties.moveFocus(this.properties.block, true);
         }
     }
 
@@ -71,7 +83,7 @@ class EditableBlock extends Component<EditableBlockProps, EditableBlockState>{
         return (
             <div className="hover:bg-gray-200 p-2">
                 <ContentEditable className="p-2" html={this.state.html} onChange={this.handleChange} onBlur={this.handleBlur} onFocus={this.onFocus}
-                    onKeyDown={this.handleKeyDown} />
+                    onKeyDown={this.handleKeyDown} id={`Bloco-${this.properties.block.id}`} />
             </div>
         );
     }

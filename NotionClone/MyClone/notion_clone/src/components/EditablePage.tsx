@@ -133,16 +133,36 @@ class EditablePage extends Component<DataProps, DataState>{
   }
 
   getEditableBlock(block:BlockData) {
-    return (<EditableBlock key={block.id} block={block} onChange={this.updateBlock} deleteBlock={this.deleteBlock} onBlur={this.saveBlock} />);
+    return (<EditableBlock key={block.id} block={block} onChange={this.updateBlock} deleteBlock={this.deleteBlock} onBlur={this.saveBlock}
+                            moveFocus={this.handleNextBlockFocus} />);
   }
 
   handleChangeNamePage = (evt : ContentEditableEvent) => {
     this.setState({ namePage : evt.target.value });
   };
 
+  handleNextBlockFocus = (block : BlockData, isNext : boolean) => {
+    const index = this.state.blocks.map((b) => b.id).indexOf(block.id);
+    const numBlocks = this.state.blocks.length;
+    if ((isNext === true && index === numBlocks -1) || (isNext === false && index === 0)){
+      return
+    }
+    var nextBlock = this.state.blocks[index];
+    if (isNext === true){
+      nextBlock = this.state.blocks[index + 1];
+    } else {
+      nextBlock = this.state.blocks[index - 1];
+    }
+    const nextSibiling = document.getElementById(`Bloco-${nextBlock.id}`);
+    //console.log(nextSibiling);
+    if(nextSibiling !== null){
+        nextSibiling.focus();
+    }
+}
+
   handleBlurNamePage = async () => {
-    console.log(this.properties.page.id);
-    console.log(`page/${this.properties.page.id}`);
+    //console.log(this.properties.page.id);
+    //console.log(`page/${this.properties.page.id}`);
     try{
       const reply = await apiClient.put(`page/${this.properties.page.id}`, {
         name : this.state.namePage
